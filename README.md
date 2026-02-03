@@ -6,14 +6,18 @@ Spring Boot REST API demonstrating JPQL JOIN between multiple tables (Employee a
 ```
 KCAPI
 ├── src/main/java
-│   └── kumlesh
-│       ├── KurrecomputersApplication.java
-│       ├── Kurre.java
-│       ├── Kurrerepo.java
-│       └── KurreControler.java
+│ └── kumlesh
+│ ├── KurrecomputersApplication.java
+│ ├── Employe.java
+│ ├── Staff.java
+│ ├── EmpStaffDTO.java
+│ ├── EmployeRepo.java
+│ ├── StaffRepo.java
+│ ├── Kurrerepo.java
+│ └── KurreController.java
 │
 ├── src/main/resources
-│   └── application.properties
+│ └── application.properties
 └── pom.xml
 ```
 
@@ -197,7 +201,25 @@ public class EmpStaffDTO {
 	}
 }
 ```
-## 📂 Step 4: Repository Layer (JOIN Query)
+📦 Step 4: Repository – EmployeRepo
+```
+package kumlesh;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import kumlesh.Employe;
+
+public interface EmployeRepo extends JpaRepository<Employe, Integer> { }
+```
+📦 Step 5: Repository – StaffRepo
+```
+package kumlesh;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import kumlesh.Staff;
+
+public interface StaffRepo extends JpaRepository<Staff, Integer> { }
+```
+📦 Step 6: Repository – JOIN (Kurrerepo)
 ```
 package kumlesh;
 
@@ -214,27 +236,110 @@ public interface Kurrerepo extends JpaRepository<Employe, Integer> {
 }
 ```
 📌 JPQL JOIN ka use karke multiple tables ka data ek DTO me return kiya gaya hai.
-## 🎮 Step 5: Controller Layer
+## 🎮 Step 7: Controller Layer
 ```
 package kumlesh;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class KurreController {
 
-	@Autowired
-	private Kurrerepo repo;
+    @Autowired
+    private EmployeRepo employeRepo;
 
-	@GetMapping("/join")
-	public List<EmpStaffDTO> joinData() {
-		return repo.getJoinData();
-	}
+    @Autowired
+    private StaffRepo staffRepo;
+
+    @Autowired
+    private Kurrerepo joinRepo;
+
+    // -------------------------------------------------------------
+    // JOIN API
+    // -------------------------------------------------------------
+    @GetMapping("/join")
+    public List<EmpStaffDTO> joinData() {
+        return joinRepo.getJoinData();
+    }
+
+    // -------------------------------------------------------------
+    // CREATE (INSERT) API
+    // -------------------------------------------------------------
+    @PostMapping("/savekurre")
+    public String savekurre(@RequestBody EmpStaffDTO dto) {
+
+        // Save Employe Table
+        Employe emp = new Employe();
+        emp.setId(dto.getId());
+        emp.setName(dto.getName());
+        emp.setMobile(dto.getMobile());
+        employeRepo.save(emp);
+
+        // Save Staff Table
+        Staff st = new Staff();
+        st.setId(dto.getId());
+        st.setAge(dto.getAge());
+        st.setCity(dto.getCity());
+        staffRepo.save(st);
+
+        return "Saved Successfully";
+    }
+
+    // -------------------------------------------------------------
+    // UPDATE API
+    // -------------------------------------------------------------
+    @PutMapping("/updatekurre/{id}")
+    public String updatekurre(@PathVariable int id, @RequestBody EmpStaffDTO dto) {
+
+        // ---------- Update Employe -------------
+        Optional<Employe> empOpt = employeRepo.findById(id);
+        if (empOpt.isPresent()) {
+            Employe emp = empOpt.get();
+            emp.setName(dto.getName());
+            emp.setMobile(dto.getMobile());
+            employeRepo.save(emp);
+        } else {
+            return "Employee Not Found!";
+        }
+
+        // ---------- Update Staff -------------
+        Optional<Staff> stOpt = staffRepo.findById(id);
+        if (stOpt.isPresent()) {
+            Staff st = stOpt.get();
+            st.setAge(dto.getAge());
+            st.setCity(dto.getCity());
+            staffRepo.save(st);
+        } else {
+            return "Staff Not Found!";
+        }
+
+        return "Updated Successfully";
+    }
+
+    // -------------------------------------------------------------
+    // DELETE API
+    // -------------------------------------------------------------
+    @DeleteMapping("/deletekurre/{id}")
+    public String deletekurre(@PathVariable int id) {
+
+        // First delete from staff (foreign dependency)
+        if (staffRepo.existsById(id)) {
+            staffRepo.deleteById(id);
+        }
+
+        // Then delete from employe
+        if (employeRepo.existsById(id)) {
+            employeRepo.deleteById(id);
+        }
+
+        return "Deleted Successfully";
+    }
 }
+
 ```
 ## 🔗 API Endpoint
 ```

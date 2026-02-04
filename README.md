@@ -20,7 +20,6 @@ KCAPI
 │ └── application.properties
 └── pom.xml
 ```
-
 ## ⚙️ Project Setup
 ### 1️⃣ Create Spring Boot Project
 - Project Type: Maven

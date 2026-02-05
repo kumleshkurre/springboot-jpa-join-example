@@ -3,7 +3,7 @@
 Spring Boot REST API demonstrating JPQL JOIN between multiple tables (Employee and Staff) using Spring Data JPA, DTO mapping, and PostgreSQL.
 
 ## 📂 Project Structure
-```
+```js
 KCAPI
 ├── src/main/java
 │ └── kumlesh
@@ -37,7 +37,7 @@ KCAPI
 
 ## 🗄️ Database Configuration
 src/main/resources/application.properties
-```
+```js
 spring.application.name=kurrecomputers
 spring.datasource.url=jdbc:postgresql://localhost:5432/your_database_name
 spring.datasource.username=your_username
@@ -51,7 +51,7 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ```
 
 ## ▶️ Application Entry Point
-```
+```js
 
 package kumlesh;
 
@@ -72,7 +72,7 @@ public class KurrecomputersApplication {
 Run the project using: Run As → Spring Boot App
 
 ## 🧱 Step 1: Create Entity – Employe
-```
+```js
 package kumlesh;
 
 import jakarta.persistence.Entity;
@@ -110,7 +110,7 @@ public class Employe {
 }
 ```
 ## 🧱 Step 2: Create Entity – Staff
-```
+```js
 package kumlesh;
 
 import jakarta.persistence.Entity;
@@ -148,7 +148,7 @@ public class Staff {
 }
 ```
 ## 📦 Step 3: Create DTO Class (Join Result)
-```
+```js
 package kumlesh;
 
 public class EmpStaffDTO {
@@ -201,7 +201,7 @@ public class EmpStaffDTO {
 }
 ```
 📦 Step 4: Repository – EmployeRepo
-```
+```js
 package kumlesh;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -210,7 +210,7 @@ import kumlesh.Employe;
 public interface EmployeRepo extends JpaRepository<Employe, Integer> { }
 ```
 📦 Step 5: Repository – StaffRepo
-```
+```js
 package kumlesh;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -219,7 +219,7 @@ import kumlesh.Staff;
 public interface StaffRepo extends JpaRepository<Staff, Integer> { }
 ```
 📦 Step 6: Repository – JOIN (Kurrerepo)
-```
+```js
 package kumlesh;
 
 import java.util.List;
@@ -236,7 +236,7 @@ public interface Kurrerepo extends JpaRepository<Employe, Integer> {
 ```
 📌 JPQL JOIN ka use karke multiple tables ka data ek DTO me return kiya gaya hai.
 ## 🎮 Step 7: Controller Layer
-```
+```js
 package kumlesh;
 
 import java.util.List;
@@ -341,7 +341,7 @@ public class KurreController {
 
 ```
 ## 🔗 API Endpoint
-```
+```css
 | Method | Endpoint | Description                |
 | ------ | -------- | -------------------------- |
 | GET    | `/join`  | Employee + Staff JOIN data |
@@ -350,6 +350,45 @@ public class KurreController {
 - API successfully performs CRUD operations
 - Data automatically stored in PostgreSQL
 - REST endpoints tested via Postman
+
+## 📝Notes (English and Hindi)
+### 🔹 Why does NULL appear in JOIN queries?
+NULL values appear in JOIN queries when the related data does not exist in one of the joined tables.
+This usually happens when:
+- Data is inserted into one table
+- The corresponding record with the same ID does not exist in the other table
+In cases of **LEFT JOIN** or **RIGHT JOIN**, the table that does not have matching data
+returns **NULL** for its columns.
+
+### Example
+If a record exists in the `employe` table but not in the `staff` table for the same ID,
+a JOIN query will return NULL values for the missing table columns.
+
+### Solution
+- Insert data first into the **parent table**
+- Then insert related data into the **child table**
+- Use **Foreign Key constraints** to maintain data consistency
+👉 NULL appears in JOIN queries because matching data does not exist in both tables.
+---
+### ❓ JOIN Query me NULL data kyon aata hai?
+
+Jab hum JOIN query use karte hain aur dono tables ka data match nahi hota,
+to result me **NULL values** aa jati hain.
+Aksar ye problem tab hoti hai jab:
+- Ek table me data insert hota hai
+- Doosri table me usi ID ka data exist nahi karta
+
+### 📌 Example
+Agar `employe` table me record hai lekin `staff` table me same `id` ka record nahi hai,
+aur hum **LEFT JOIN** ya **RIGHT JOIN** use karte hain,
+to jis table ka data missing hota hai wahan **NULL** aa jata hai.
+
+### ✅ Solution
+- Pehle **parent table** (employe) me data insert karein
+- Phir **child table** (staff) me insert karein
+- Foreign Key constraint use karein taaki data mismatch na ho
+
+👉 Isliye JOIN me NULL aata hai, kyunki dono tables ka data same (matching) nahi hota.
 
 ## 🎯 Learning Outcome
 - Hands-on experience with Spring Boot
